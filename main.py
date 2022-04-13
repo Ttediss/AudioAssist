@@ -1,108 +1,137 @@
+from contextlib import nullcontext
 import json
 import os.path
 import time
 import datetime
 import pyaudio
+from sympy import true
 from vosk import Model, KaldiRecognizer
 import pyttsx3
 from func_command import Caterpillars, Manipulator, Camera, Date
-from Interface import Print
+from Interface import AmurGUI
 import sys
+import threading
+
 
 class VoiceAssistant:
-	name = ""
-	sex = ""
-	speech_language = ""
-	recognition_language = ""
+    name = ""
+    sex = ""
+    speech_language = ""
+    recognition_language = ""
 
-def setup_assistant_voices():
-	voices = ttsEngine.getProperty("voices")
+    # private
+    __ttsEngine = nullcontext
+    __rec = nullcontext
+    __stream = nullcontext
 
-	if assistant.speech_language == "en":
-		assistant.recognition_language = "en-US"
-		if assistant.sex == "female":
-			ttsEngine.setProperty("voice", voices[1].id)
-		else:
-			ttsEngine.setProperty("voice", voices[2].id)
-	else:
-		assistant.recognition_language = "ru-RU"
-		#ttsEngine.setProperty("voice", voices[56].id)
+    # setup_assistant_voices
+    def __init__(self):
+        model = Model("osk-model-small-ru-0.4")
+        self.__rec = KaldiRecognizer(model, 16000)
+        p = pyaudio.PyAudio()
+        self.__stream = p.open(format=pyaudio.paInt16, channels=1,
+                        rate=16000, input=True, frames_per_buffer=8000)
+        self.__stream.start_stream()
 
-def play_voice_assistant_speech(text_to_speech):
-	ttsEngine.say(text_to_speech)
-	ttsEngine.runAndWait()
+        self.__ttsEngine = pyttsx3.init()
+        voices = self.__ttsEngine.getProperty("voices")
 
-model = Model("osk-model-small-ru-0.4")
-rec = KaldiRecognizer(model, 16000)
-p = pyaudio.PyAudio()
-stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=8000)
-stream.start_stream()
+        if self.speech_language == "en":
+            self.recognition_language = "en-US"
+            if self.sex == "female":
+                self.__ttsEngine.setProperty("voice", voices[1].id)
+            else:
+                self.__ttsEngine.setProperty("voice", voices[2].id)
+        else:
+            self.recognition_language = "ru-RU"
+            # ttsEngine.setProperty("voice", voices[56].id)
 
-def listen():
-    while True:
-        data = stream.read(4000, exception_on_overflow=False)
-        if (rec.AcceptWaveform(data)) and (len(data)>0):
-            answer = json.loads(rec.Result())
-            if answer['text']:
-                yield answer['text']
+    def play_speech(self, text_to_speech):
+        self.__ttsEngine.say(text_to_speech)
+        self.__ttsEngine.runAndWait()
+
+
+    def listen(self):
+        while True:
+            data = self.__stream.read(4000, exception_on_overflow=False)
+            if (self.__rec.AcceptWaveform(data)) and (len(data) > 0):
+                answer = json.loads(self.__rec.Result())
+                if answer['text']:
+                    yield answer['text']
+
+
+data_text = "%Y.%m.%d-%H:%M:%S"
+
+
+def log_text(text):
+    str = datetime.datetime.today().strftime(data_text) + ' ' + text
+    print(str)
+    Log.writelines(str + '\n')
+
+
+def listen_handler():
+    for text in assistant.listen():
+        log_text(text)
+        if "амур триста семь" in text or "амур" in text:
+            gui.Print(datetime.datetime.today().strftime(
+                data_text) + ' ' + text)
+            if "привет" in text:
+                answer = " АМУР: приветствую вас, сэр!"
+                gui.Print(datetime.datetime.today().strftime(
+                    data_text) + answer)
+                assistant.play_speech("приветствую вас, сэр!")
+                log_text(answer)
+
+            elif "состояние" in text:
+                answer = " АМУР: я нахожусь в стадии разработки"
+                gui.Print(datetime.datetime.today().strftime(
+                    data_text) + answer)
+                assistant.play_speech("я нахожусь в стадии разработки")
+                log_text(answer)
+            elif "отбой" in text:
+                answer = ' АМУР: всего доброго сэр!\n'
+                gui.Print(datetime.datetime.today().strftime(
+                    data_text) + " АМУР: всего доброго сэр!")
+                assistant.play_speech("всего доброго сэр!")
+                log_text(answer)
+                Log.close()
+                sys.exit()
+            else:
+                answer = " АМУР: я не понимаю вас"
+                gui.Print(datetime.datetime.today().strftime(data_text) + answer)
+                assistant.play_speech("я не понимаю вас")
+                log_text(answer)
+
+
 if __name__ == "__main__":
-	ttsEngine = pyttsx3.init()
 
-	assistant = VoiceAssistant()
-	assistant.name = "Jarvis"
-	assistant.sex = "male"
-	assistant.speech_language = "ru"
-
-	setup_assistant_voices()
+    assistant = VoiceAssistant()
+    assistant.name = "Jarvis"
+    assistant.sex = "male"
+    assistant.speech_language = "ru"
+    gui = AmurGUI()
 
 
-	Log = open('Log.txt', 'a')
-	a = os.path.getsize('Log.txt')
-	if a > 10485760: # a>1 Mbyte
-		Log.close()
-		os.rename('Log.txt', 'Log_old.txt')
-		Log = open('Log.txt', 'w+')
-	#print(a)
+    Log = open('Log.txt', 'a')
+    a = os.path.getsize('Log.txt')
+    if a > 10485760:  # a>1 Mbyte
+        Log.close()
+        os.rename('Log.txt', 'Log_old.txt')
+        Log = open('Log.txt', 'w+')
+    print(a)
 
-	hello = " Приветствую вас!"
-	working = " Работаем!"
-	# window()
-	Print(hello)
-	Print(working)
+    hello = " Приветствую вас!"
+    working = " Работаем!"
 
+    log_text(hello)
+    assistant.play_speech(hello)
+    log_text(working)
+    assistant.play_speech(working)
 
-	print(hello)
-	print(working)
-	play_voice_assistant_speech(hello)
-	Log.writelines(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + hello+'\n')
-	play_voice_assistant_speech(working)
-	Log.writelines(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + working+'\n')
+    t1 = threading.Thread(target=listen_handler)
+    t1.start()
+    gui.window_handler()
+    gui.window.close()
 
-
-	for text in listen():
-
-		print(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + ' ' + text)
-		Log.writelines(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + ' ' + text + '\n')
-		if "амур триста семь" in text:
-			Print(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") +' '+  text)
-			if "привет" in text:
-
-				print(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + " АМУР: приветствую вас, сэр!")
-				Print(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + " АМУР: приветствую вас, сэр!")
-				play_voice_assistant_speech("приветствую вас, сэр!")
-				Log.writelines(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + ' АМУР:  приветствую вас, сэр!\n')
-
-			elif "состояние" in text:
-
-				print(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + " АМУР: я нахожусь в стадии разработки")
-				Print(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + " АМУР: я нахожусь в стадии разработки")
-				play_voice_assistant_speech("я нахожусь в стадии разработки")
-				Log.writelines(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + ' АМУР: я нахожусь в стадии разработки\n')
-			elif "отбой" in text:
-
-				print(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + " АМУР: всего доброго сэр!")
-				Print(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + " АМУР: всего доброго сэр!")
-				play_voice_assistant_speech("всего доброго сэр!")
-				Log.writelines(datetime.datetime.today().strftime("%Y.%m.%d-%H:%M:%S") + ' АМУР: всего доброго сэр!\n')
-				Log.close()
-				sys.exit()
+    # t1 = threading.Thread( target = listen_handler)
+    # t1.start()
