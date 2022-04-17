@@ -5,13 +5,16 @@ import PySimpleGUI as sg
 class AmurGUI:
 
     def __init__(self):
+
         layout = [
-            [sg.Output(size=(200, 15), key='-out_text-')],
-            [sg.Button('Старт', key='-bt_start-'),
-             sg.Button('Стоп', key='-bt_stop-')]
+            [sg.Output(size=(60, 15), key='-out_text-'),
+            sg.Image(r'example.png',size=(300,212),key='-img_code-')],
+            [sg.Button('Старт', key='-bt_start-',size=(6, 2)),
+             sg.Button('Стоп', key='-bt_stop-',size=(6, 2)),
+             sg.Button('Тест', key='-bt_test-',size=(6, 2))]
         ]
         self.out_texts =''
-        self.window = sg.Window('AudioAssist', layout, size=(600, 350))
+        self.window = sg.Window('AudioAssist', layout, size=(800, 450))
 
 
     def window_event(self):
@@ -28,6 +31,8 @@ class AmurGUI:
                 self.Print('уже старт')
             elif event == '-bt_stop-':
                 break
+            elif event == '-bt_test-':
+                self.Print('я не знаю, что делать')
             elif event == sg.WIN_CLOSED:    
                 break
 
