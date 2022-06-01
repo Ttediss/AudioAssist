@@ -30,8 +30,8 @@ class Caterpillars:
             voice_command = "назад на " + str(Parameters.Gus_back)
             print(Parameters.Gus_back)
 
-        with open(logs, 'a') as s_file:  # запись в логи
-            s_file.write(str(datetime.datetime.now()) + ": Гусеницы || " + voice_command + " м" + "\n")
+        # with open(logs, 'a') as s_file:  # запись в логи
+        #     s_file.write(str(datetime.datetime.now()) + ": Гусеницы || " + voice_command + " м" + "\n")
 
     @staticmethod
     def right_left(voice, rotation):  # Метод отвечает за команды направо/налево
@@ -50,8 +50,8 @@ class Caterpillars:
             voice_command = "поворот налево на " + str(Parameters.Gus_left)
             print(Parameters.Gus_left)
 
-        with open(logs, 'a') as s_file:  # запись в логи
-            s_file.write(str(datetime.datetime.now()) + ": Гусеницы || " + voice_command + " град" + "\n")
+        # with open(logs, 'a') as s_file:  # запись в логи
+        #     s_file.write(str(datetime.datetime.now()) + ": Гусеницы || " + voice_command + " град" + "\n")
 
     @staticmethod
     def caterpillars(voice):  # финальный метод (условия)
@@ -68,7 +68,7 @@ class Caterpillars:
         elif (voice_split[0] + ' ' + voice_split[1]) == "поворот налево":
             Caterpillars.right_left(voice, False)  # при значении False поворот налево
 
-    # Класс манипулятора
+# Класс манипулятора
 class Manipulator:
     @staticmethod
     def up_down(voice, position):  # Метод отвечает за команды манипулятора вверх/вниз
@@ -88,8 +88,8 @@ class Manipulator:
             voice_command = "опустить на " + str(Parameters.Manipulator_down)
             print(Parameters.Manipulator_down)
 
-        with open(logs, 'a') as s_file:  # запись в логи
-            s_file.write(str(datetime.datetime.now()) + ": Манипулятор || " + voice_command + " см" + "\n")
+        # with open(logs, 'a') as s_file:  # запись в логи
+        #     s_file.write(str(datetime.datetime.now()) + ": Манипулятор || " + voice_command + " см" + "\n")
 
     @staticmethod
     def flag(flag):  # Метод отвечает за команды манипулятора схватить/отпустить
@@ -103,8 +103,8 @@ class Manipulator:
             voice_command = "состояние схвата: " + str(Parameters.Manipulator_flag)
             print(Parameters.Manipulator_flag)
 
-        with open(logs, 'a') as s_file:  # запись в логи
-            s_file.write(str(datetime.datetime.now()) + ": Манипулятор || " + voice_command + "\n")
+        # with open(logs, 'a') as s_file:  # запись в логи
+        #     s_file.write(str(datetime.datetime.now()) + ": Манипулятор || " + voice_command + "\n")
 
     @staticmethod
     def manipulator(voice):  # финальный метод (условия)
@@ -137,7 +137,7 @@ class Camera:
             except ValueError:
                 Parameters.Camera_right = int(voice_split[3])
                 print(Parameters.Camera_right)
-            voice_command = "направа на " + str(Parameters.Camera_right)
+            voice_command = "направо на " + str(Parameters.Camera_right)
 
         elif not rotation:
             try:
@@ -148,14 +148,14 @@ class Camera:
                 print(Parameters.Camera_left)
             voice_command = "налево на " + str(Parameters.Camera_left)
 
-            with open(logs, 'a') as s_file:  # запись в логи
-                s_file.write(str(datetime.datetime.now()) + ": Камера || " + voice_command + " град" + "\n")
+            # with open(logs, 'a') as s_file:  # запись в логи
+            #     s_file.write(str(datetime.datetime.now()) + ": Камера || " + voice_command + " град" + "\n")
 
     @staticmethod
     def camera(voice):  # Финальный метод (условия)
         voice_split = str(voice).split(' ')
         if voice_split[0] == "камера" or voice_split[0] == "камеры":
-            if voice_split[1] == "направо" or (voice_split[1] + ' ' + voice_split[2]) == "на права" \
+            if voice_split[1] == "направо" or (voice_split[1] + ' ' + voice_split[2]) == "на право" \
                     or (voice_split[1] + ' ' + voice_split[2]) == "на право" or voice_split[1] == "направлена":
                 Camera.right_left(voice, True)
             elif voice_split[1] == "налево" or (voice_split[1] + ' ' + voice_split[2]) == "на лево":
