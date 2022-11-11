@@ -1,6 +1,6 @@
 import pyttsx3
 
-class voice_acting:
+class Voice_acting:
     def settings(property, value):
         engine.setProperty(property, value)
     def say(text):

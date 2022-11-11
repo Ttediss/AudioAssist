@@ -5,7 +5,7 @@ import datetime
 
 import pyaudio
 from vosk import Model, KaldiRecognizer
-import GUI
+
 import sys
 import threading
 import logging
@@ -16,6 +16,7 @@ from PyQt5 import QtWidgets
 import numpy as np
 import cv2
 import cv2.aruco as aruco
+# from cv2 import aruco as aruco
 import math
 import time
 from PyQt5 import QtGui
@@ -484,3 +485,5 @@ if __name__ == "__main__":
     mainV.show()
     sys.exit(app.exec_())
     # ----------------------
+
+    # test
